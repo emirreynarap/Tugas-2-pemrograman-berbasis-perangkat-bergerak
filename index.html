@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tugas: Cuaca Jakarta</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Prakiraan Cuaca Jakarta 🌤️</h2>
+        <p>Menampilkan suhu per jam dari Open-Meteo API.</p>
+
+        <table id="tabel-cuaca">
+            <thead>
+                <tr>
+                    <th>Waktu Pengukuran (Time)</th>
+                    <th>Suhu (°C)</th>
+                </tr>
+            </thead>
+            <tbody id="body-tabel">
+                <tr>
+                    <td colspan="2">Memuat data...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // 1. Simpan URL API ke dalam variabel
+        const urlAPI = 'https://api.open-meteo.com/v1/forecast?latitude=-6.2&longitude=106.8&hourly=temperature_2m';
+
+        // 2. Buat fungsi untuk mengambil data
+        async function ambilDataCuaca() {
+            try {
+                // Proses menghubungi API
+                const respons = await fetch(urlAPI);
+                const dataJSON = await respons.json();
+
+                // Mengambil spesifik data waktu dan suhu dari JSON
+                const waktuArray = dataJSON.hourly.time;
+                const suhuArray = dataJSON.hourly.temperature_2m;
+
+                // Memilih elemen tbody pada tabel
+                const tbody = document.getElementById('body-tabel');
+                tbody.innerHTML = ''; // Mengosongkan teks "Memuat data..."
+
+                // 3. Looping data (contoh ini menampilkan 24 jam pertama saja agar tabel tidak terlalu panjang)
+                for (let i = 0; i < 24; i++) {
+                    // Membuat format tanggal dan waktu menjadi format lokal Indonesia
+                    const tanggal = new Date(waktuArray[i]);
+                    const waktuFormat = tanggal.toLocaleString('id-ID');
+
+                    // Membuat elemen baris tabel
+                    const baris = document.createElement('tr');
+
+                    // Mengisi kolom tabel dengan data
+                    baris.innerHTML = `
+                        <td>${waktuFormat}</td>
+                        <td>${suhuArray[i]}</td>
+                    `;
+
+                    // Memasukkan baris tersebut ke dalam tabel
+                    tbody.appendChild(baris);
+                }
+
+            } catch (error) {
+                // Jika terjadi kesalahan (misal koneksi terputus)
+                console.error('Terjadi kesalahan:', error);
+                document.getElementById('body-tabel').innerHTML = '<tr><td colspan="2">Gagal memuat data. Periksa koneksi internetmu.</td></tr>';
+            }
+        }
+
+        // 4. Jalankan fungsi saat halaman dibuka
+        ambilDataCuaca();
+    </script>
+
+</body>
+
+</html>
